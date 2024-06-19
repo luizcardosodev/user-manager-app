@@ -1,4 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
+html, body { background-color: rgb(37, 37, 37); }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";

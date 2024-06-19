@@ -1,0 +1,34 @@
+<div class="flex justify-center items-center min-h-screen">
+    <div class="w-full max-w-4xl">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-lg font-bold text-gray-200">User Management</span>
+            <button mat-raised-button color="primary" (click)="openDialog()">Adicionar</button>
+          </div>
+        <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+            <!-- Nome Column -->
+            <ng-container matColumnDef="nome">
+                <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.nome}} </mat-cell>
+            </ng-container>
+
+            <!-- Nome Column -->
+            <ng-container matColumnDef="email">
+                <mat-header-cell *matHeaderCellDef> Email </mat-header-cell>
+                <mat-cell *matCellDef="let element"> {{element.nome}} </mat-cell>
+            </ng-container>
+
+            <!-- Ações Column -->
+            <ng-container matColumnDef="acoes">
+                <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                <mat-cell *matCellDef="let element">
+                    <button mat-button (click)="openDialog(element)">Editar</button>
+                    <button mat-button color="warn" (click)="deleteRow(element)">Excluir</button>
+                </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-800 cursor-pointer"></mat-row>
+        </mat-table>
+    </div>
+</div>
