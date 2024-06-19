@@ -1,19 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { UserDialogComponent } from '../user-dialog/user-dialog.component';
-
-export interface PeriodicElement {
-  nome: string;
-  email: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { nome: 'Elemento 1', email: "ricardoasc@live.com" },
-  { nome: 'Elemento 2', email: "ricardoasc@live.com" },
-  { nome: 'Elemento 3', email: "ricardoasc@live.com" }
-];
+import { UserModel } from '../../models/UserModel';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-user-table',
@@ -22,44 +13,80 @@ const ELEMENT_DATA: PeriodicElement[] = [
     MatTableModule,
     MatButtonModule
   ],
+  providers: [UserService],
   templateUrl: './user-table.component.html',
   styleUrl: './user-table.component.scss'
 })
-export class UserTableComponent {
+export class UserTableComponent implements OnInit {
 
+  ELEMENT_DATA: UserModel[] = [];
   displayedColumns: string[] = ['nome', 'email', 'acoes'];
-  dataSource = new MatTableDataSource(ELEMENT_DATA);
+  dataSource = new MatTableDataSource(this.ELEMENT_DATA);
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private userService: UserService) { }
 
-  addRow() {
-    const newRow = { nome: `Elemento ${this.dataSource.data.length + 1}`, email: 'test' };
-    this.dataSource.data = [...this.dataSource.data, newRow];
-  }
-  
-  deleteRow(element: PeriodicElement) {
-    this.dataSource.data = this.dataSource.data.filter(e => e !== element);
+  ngOnInit(): void {
+
   }
 
-  openDialog(element?: PeriodicElement): void {
+  private loadUsers() {
+    this.userService.getUsers().subscribe(
+      (users: UserModel[]) => {
+        this.dataSource.data = users;
+      },
+      error => {
+        console.error('Error in load users:', error);
+      }
+    );
+  }
+
+  openDialog(user?: UserModel): void {
     const dialogRef = this.dialog.open(UserDialogComponent, {
       width: '500px',
+      height: '400px',
       data: {
-        isEdit: !!element,
-        user: element || { nome: '', email: '' }
+        isEdit: !!user,
+        user: user || { id: 0, name: '', email: '' }
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        if (element) {
-          element.nome = result.nome;
-          element.email = result.email;
+        if (result.id) {
+          this.userService.updateUser(result.id, result).subscribe(
+            () => {
+              this.loadUsers();
+            },
+            error => {
+              console.error('Error when update user:', error);
+            }
+          );
         } else {
-          this.dataSource.data = [...this.dataSource.data, result];
+
+          this.userService.addUser(result).subscribe(
+            () => {
+              this.loadUsers();
+            },
+            error => {
+              console.error('Error when add user:', error);
+            }
+          );
         }
       }
     });
+  }
+
+  deleteRow(user: UserModel): void {
+    if (confirm(`Tem certeza que deseja excluir "${user.name}"?`)) {
+      this.userService.deleteUser(user.id).subscribe(
+        () => {
+          this.loadUsers();
+        },
+        error => {
+          console.error('Erro when delete user:', error);
+        }
+      );
+    }
   }
 
 }
